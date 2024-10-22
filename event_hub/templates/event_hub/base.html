@@ -1,0 +1,20 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EventHub{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'event_hub/output.css' %}" />
+    <link rel="stylesheet" href="{% static 'event_hub/css/fontawesome.css' %}" />
+    <link rel="stylesheet" href="{% static 'event_hub/css/brands.css' %}" />
+    <link rel="stylesheet" href="{% static 'event_hub/css/solid.css' %}" />
+    {% block css_files %}{% endblock %}
+</head>
+<body>
+    <div class="container mx-auto">
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

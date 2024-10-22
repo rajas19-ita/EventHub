@@ -1,0 +1,18 @@
+{% extends 'event_hub/base.html' %}
+{% load static %}
+
+{% block title %}
+    confirm delete
+{% endblock %}
+
+{% block content %}
+    {% include 'event_hub/includes/header.html' %}
+    <section class="px-6 py-8 flex justify-center">
+        <form method="post" class="flex flex-col gap-3">
+            {% csrf_token %}
+            <p>Are you sure you want to delete event "{{ object.title }}"?</p>
+            {{ form }}
+            <input type="submit" value="Confirm" class="bg-red-600 text-white py-2 px-6 rounded self-center font-semibold">
+        </form>
+    </section>
+{% endblock %}

@@ -1,0 +1,267 @@
+{% extends 'event_hub/base.html' %}
+{% load static %}
+
+{% block content %}
+    {% include 'event_hub/includes/header.html' %}
+    <section class="px-6 py-8 flex justify-center">
+        <form id="id_event_form" class="flex flex-col gap-4" method="post" action="{% url 'event_hub:event_create' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class=" w-80 h-56 rounded mb-2 self-center relative">
+                <img id="cover_image" class="w-full h-full object-contain" />
+                <label for="id_cover_image" class="absolute -top-3 -right-3 px-2 py-1 rounded-md border-green-600 border-2 cursor-pointer">
+                    <i class="fa-solid fa-pen-to-square text-green-600"></i>
+                </label> 
+                <input type="file" name="cover_image" accept="image/*" required="" id="id_cover_image"
+                class="hidden"> 
+            </div>
+            <div class="flex flex-col gap-1">
+                <label for="id_title">Title:</label>
+                <input type="text" name="title" maxlength="150" required="" id="id_title"
+                class="border-2 p-2 rounded">
+            </div>
+            <div class="flex flex-col gap-1">
+                <label for="id_description">Description:</label>
+                <textarea name="description" cols="40" rows="10" required="" id="id_description" class="border-2 p-2 rounded"></textarea>  
+            </div>
+            <div class="flex flex-col gap-1">
+                <label for="id_short_description">Event Identifier:</label>
+                <input type="text" name="short_description" maxlength="50" required="" aria-describedby="id_short_description_helptext" id="id_short_description"
+                class="border-2 p-2 rounded"> 
+                <p class="helptext text-gray-500" id="id_short_description_helptext">(a short, memorable description for your event (max 50 characters))</p> 
+            </div>
+            <div class="flex flex-col gap-2">
+                <div class="flex gap-2 items-center flex-wrap max-w-80" id="selected-tags">
+                    <label for="id_tag_search">Tags:</label>
+                </div>
+                <div class="relative">
+                    <input id="id_tag_search" type="text" name="tag_search" placeholder="Search tags..." 
+                    class="w-full border-2 p-2 rounded">
+                    <div id="id_tags"  class="absolute w-full max-h-60 overflow-y-scroll bg-white p-4 rounded z-10 border-2 mt-1 hidden">
+                        {% for tag in tags_list %}
+                            <label for="id_tags_{{tag.id}}" class="tag mr-3 whitespace-nowrap" data-name="{{tag.name}}">
+                                <input type="checkbox" name="tags" value={{tag.id}} data-tag-name="{{tag.name}}" id="id_tags_{{tag.id}}" class="mr-1 tag-checkbox-input">{{tag.name}}</label>
+                        {% endfor %}
+                        <div id="add-tag-div" class="hidden flex-col gap-2 items-center">
+                            <p class="border-b-2 text-start self-stretch py-2 text-gray-500">No tag found!</p>
+                            <p>Add new tag</p>
+                            <div class="flex gap-2 items-center">
+                                <input id="tag_create_input" type="text" class="border-2 px-2 py-1 rounded">
+                                <button id="tag_create_btn" type="button" class="py-1 px-4 rounded font-semibold border text-green-600 border-green-600">Add</button>
+                            </div>
+                            <p id="tag-create-error" class="text-red-500"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col gap-1">
+                <label for="id_address">Address:</label>
+                <input type="text" name="address" maxlength="150" required="" id="id_address"
+                class="border-2 p-2 rounded"> 
+            </div>
+            <div class="flex flex-col gap-1">
+                <label for="id_city">City:</label>
+                <input type="text" name="city" maxlength="100" required="" id="id_city"
+                class="border-2 p-2 rounded"> 
+            </div>
+            <div class="flex flex-col gap-1">
+                <label for="id_pincode">Pincode:</label>
+                <input type="text" name="pincode" maxlength="15" required="" id="id_pincode"
+                class="border-2 p-2 rounded">  
+            </div>
+            <div class="flex flex-col gap-1">
+                <label for="id_state">State:</label>
+                <input type="text" name="state" maxlength="100" required="" id="id_state"
+                class="border-2 p-2 rounded"> 
+            </div>
+            <div class="flex flex-col gap-1">
+                <label for="id_country">Country:</label>
+                <input type="text" name="country" maxlength="150" required="" id="id_country" 
+                class="border-2 p-2 rounded">    
+            </div>
+            <div class="flex flex-col gap-1">
+                <label for="id_datetime">Datetime:</label>
+                <input type="datetime-local" name="datetime" required="" id="id_datetime"
+                class="border-2 p-2 rounded">  
+                <p id="id_event_datetime_info" class="text-blue-600 max-w-96">Please enter the event time based on event location timezone: </p>
+            </div>
+            <input type="hidden" name="timezone" id="id_timezone"  >
+            <button type="submit" class="bg-green-600 text-white py-2 px-6 rounded self-center font-semibold">Create Event</button>
+        </form>
+    </section>
+    <script>
+        const coverImg = document.getElementById('cover_image')
+        const coverImgInput = document.getElementById('id_cover_image')
+        const tagSearchInput = document.getElementById('id_tag_search')
+        const tagsDropdown = document.getElementById('id_tags')
+        const tags = Array.from(tagsDropdown.getElementsByClassName('tag'))
+        const tagsCheckboxList = Array.from(document.querySelectorAll('.tag-checkbox-input'))
+        const selectedTagsDiv = document.getElementById('selected-tags')
+        const cityInput = document.getElementById('id_city')
+        const countryInput = document.getElementById('id_country')
+        const datetimeInput = document.getElementById('id_datetime')
+    
+
+        // function to show and hide selected tags   
+        function selectedTagsShow(e){
+            if(e.target.checked){
+                const tagName = e.target.getAttribute('data-tag-name')
+                const tagSpan = `<span id='tag-${e.target.value}' class="inline-block px-3 py-1 border-2 border-gray-300 rounded font-medium text-gray-500">${tagName}</span>`
+                selectedTagsDiv.insertAdjacentHTML('beforeend',tagSpan)
+            }else{
+                document.getElementById(`tag-${e.target.value}`).remove()
+            }
+        }
+
+        // attaching show and hide tag listener to all tags checkbox
+        tagsCheckboxList.forEach((checkbox)=>checkbox.addEventListener('input',selectedTagsShow))
+
+        // display cover image on image load
+        coverImgInput.addEventListener('change',(e)=>{
+            const selectedFile =  coverImgInput.files[0]
+            const reader = new FileReader()
+
+            reader.onload = function(e){
+                coverImg.setAttribute('src',e.target.result)
+            }
+            reader.readAsDataURL(selectedFile)
+        })
+
+        // show tags dropdown when focused on tags search input
+        tagSearchInput.addEventListener('focus',(e)=>{
+            tagsDropdown.classList.remove('hidden')
+        })
+
+        // filter tags in dropdown based on search term
+        tagSearchInput.addEventListener('input',(e)=>{
+            const searchTerm = tagSearchInput.value.toLowerCase()
+            const addTagDiv = document.getElementById('add-tag-div')
+            let count = 0
+
+            addTagDiv.classList.remove('flex')
+            addTagDiv.classList.add('hidden')
+            
+            tags.forEach((tag)=>{
+                const tagName = tag.getAttribute('data-name').toLowerCase()
+                
+                if(tagName.includes(searchTerm)){
+                    count += 1
+                    tag.style.display = 'inline'
+                }else{
+                    tag.style.display = 'none'  
+                }
+            })
+
+            if(count == 0){
+                addTagDiv.classList.remove('hidden')
+                addTagDiv.classList.add('flex')
+            }
+        })
+
+        // close tags dropdown when clicked outside of dropdown
+        document.addEventListener('click',(e)=>{
+            const isClickInside = tagSearchInput.contains(e.target) || tagsDropdown.contains(e.target)
+
+            if(!isClickInside){
+                tagsDropdown.classList.add('hidden')
+            }
+        })
+
+        // post request to backend to create new tag and select
+        document.getElementById('tag_create_btn').addEventListener('click',(e)=>{
+            fetch('/event-hub/tags/create',{
+                method:'POST',
+                headers:{
+                    'Content-Type' : 'application/json',
+                    'X-CSRFToken': '{{csrf_token}}'
+                },
+                body: JSON.stringify({'tag_name':document.getElementById('tag_create_input').value})
+            })
+            .then((response)=>{
+                if(!response.ok){
+                    return response.json().then((errData)=>{
+                        throw new Error(errData.message)
+                    })
+                }
+                return response.json()
+            })
+            .then((data)=>{
+                document.getElementById('tag_create_input').value = ''
+                document.getElementById('tag-create-error').innerText = ''
+                const tag = data.tag
+                const tagChekbox = `<label for="id_tags_${tag.id}" class="tag mr-3 whitespace-nowrap" data-name=${tag.name}>
+                                        <input type="checkbox" name="tags" value=${tag.id} data-tag-name=${tag.name} id="id_tags_${tag.id}" class="mr-1 tag-checkbox-input" checked>${tag.name}</label>`
+                const tagSpan = `<span id='tag-${tag.id}' class="inline-block px-3 py-1 border-2 border-gray-300 rounded font-medium text-gray-500">${tag.name}</span>`
+                                        
+                selectedTagsDiv.insertAdjacentHTML('beforeend',tagSpan)
+                tagsDropdown.insertAdjacentHTML('afterbegin',tagChekbox)
+                
+                const tagCheckboxInput = document.getElementById(`id_tags_${tag.id}`)
+                const addTagDiv = document.getElementById('add-tag-div') 
+
+                tags.push(tagCheckboxInput.parentElement)
+                tagCheckboxInput.addEventListener('input',selectedTagsShow)
+                addTagDiv.classList.remove('flex')
+                addTagDiv.classList.add('hidden')
+                tagSearchInput.value = ''
+            })
+            .catch((error)=>{
+                document.getElementById('tag-create-error').innerText = error.message
+            })
+        })
+
+        // this will return debounced function
+        const debounce = (func, delay)=>{
+            let timeoutId
+            return (...args)=>{
+                clearTimeout(timeoutId)
+                timeoutId = setTimeout(()=>func(...args),delay)
+            }
+        }
+
+        // fetch timezone info based on event city and country
+        function fetchTimezone(){
+            const city = cityInput.value.trim()
+            const country = countryInput.value.trim()
+
+            if(city && country){
+                fetch(`https://api.mapbox.com/search/geocode/v6/forward?place=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&access_token={{MAPBOX_KEY}}`)
+                .then((response)=>response.json())
+                .then((data)=>{
+                    const long = data.features[0].geometry.coordinates[0]
+                    const lat = data.features[0].geometry.coordinates[1]
+
+                    return fetch(`https://api.timezonedb.com/v2.1/get-time-zone?key={{TIMEZONE_KEY}}&format=json&by=position&lat=${lat}&lng=${long}`)
+                })
+                .then((response)=>response.json())
+                .then((data)=>{
+                    datetimeInput.removeAttribute('disabled')
+                    const tzInfo = document.getElementById('id_event_datetime_info')
+                    document.getElementById('id_timezone').value = data.zoneName
+                    tzInfo.innerText = `Please enter the event time based on event location timezone:  ${data.zoneName}`
+                    tzInfo.style.color = '#2563eb'
+                })
+                .catch((err)=>{
+                    datetimeInput.setAttribute('disabled',true)
+                    const tzError
+                     = document.getElementById('id_event_datetime_info')
+                    tzError.innerText = 'Timezone could not be determined. Please input valid city and country names'
+                    tzError.style.color = 'red'
+                })
+            }
+        }
+
+        const debouncedFetchTimezone = debounce(fetchTimezone,500)
+
+        cityInput.addEventListener('input', debouncedFetchTimezone)
+        countryInput.addEventListener('input', debouncedFetchTimezone)
+
+        // prevent form submission if zero tags are selected
+        document.getElementById('id_event_form').addEventListener('submit',function(e){
+            const selectedTags = document.querySelectorAll('.tag-checkbox-input:checked')
+            if(selectedTags.length === 0){
+                e.preventDefault();
+                alert('Please select atleast one tag.')
+            }
+        })
+    </script>
+{% endblock %}

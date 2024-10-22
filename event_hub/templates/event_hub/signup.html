@@ -1,0 +1,54 @@
+{% extends 'event_hub/base.html' %}
+
+{% block content %}
+    <div class="min-h-screen flex justify-center ">
+        <div class="shadow-md rounded-md w-full max-w-md p-8 mt-4">
+            <h2 class="text-center text-4xl font-semibold mb-8">Create Account</h2>
+            <form class="flex flex-col gap-4" method="post" action="{% url 'event_hub:signup' %}">
+                {% csrf_token %}
+                <div class="flex flex-col gap-1">
+                    <label for="id_name">Name:</label>
+                    <input type="text" name="name" maxlength="150" required="" id="id_name"
+                    class="border-2 p-2 rounded">
+                    {% for error in form.name.errors %}
+                            <p class="text-red-500">{{error}}</p>
+                    {% endfor%}
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label for="id_username">Username:</label>
+                    <input type="text" name="username" maxlength="150" required=""  id="id_username"
+                    class="border-2 p-2 rounded">  
+                    {% for error in form.username.errors %}
+                            <p class="text-red-500">{{error}}</p>
+                    {% endfor%} 
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label for="id_email">Email:</label>
+                    <input type="email" name="email" maxlength="254" required="" id="id_email"
+                    class="border-2 p-2 rounded">
+                    {% for error in form.email.errors %}
+                            <p class="text-red-500">{{error}}</p>
+                    {% endfor%}
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label for="id_password1">Password:</label>
+                    <input type="password" name="password1" autocomplete="new-password" id="id_password1"
+                    class="border-2 p-2 rounded">
+                    {% for error in form.password1.errors %}
+                            <p class="text-red-500">{{error}}</p>
+                    {% endfor%}
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label for="id_password2">Password confirmation:</label>
+                    <input type="password" name="password2" autocomplete="new-password" id="id_password2"
+                    class="border-2 p-2 rounded">
+                    {% for error in form.password2.errors %}
+                            <p class="text-red-500">{{error}}</p>
+                    {% endfor%} 
+                </div>
+                <button type="submit" class="py-2 px-6 mt-3 rounded self-center font-semibold bg-blue-600  text-white">Sign up</button>
+                <p class="self-center">Already have an account? <a href="{% url 'event_hub:login' %}"  class="text-blue-600 font-medium">Log In</a></p>
+            </form>
+        </div>
+    </div>
+{% endblock %}

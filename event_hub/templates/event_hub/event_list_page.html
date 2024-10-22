@@ -1,0 +1,47 @@
+{% extends 'event_hub/base.html' %}
+{% load static %}
+{% load event_hub_extras %}
+
+{% block content %}
+    {% include 'event_hub/includes/header.html' %}
+    <section class="px-6 py-8 text-gray-800">
+        <div class="flex flex-col w-full gap-3">
+            <form method="GET" action="{% url 'event_hub:event_list' %}" class="flex w-full justify-center gap-3 items-center">
+                <input id="title_search" type="text" name="title" class="border-2 p-2 rounded w-full max-w-md" >
+                <button id="search_btn" class="py-2 px-6 rounded self-center font-semibold bg-blue-600  text-white">Search</button>
+            </form>
+            <div class="w-full max-w-5xl mx-auto grid grid-cols-3 gap-y-5 mt-6">
+                {% for event in event_list %}
+                    <div class="max-w-80 w-full rounded shadow-md">
+                        <div class="w-full h-52 rounded-t">
+                            <img src="{{event.cover_image.url}}" class="rounded-t object-cover w-full h-full bg-slate-200">
+                        </div>
+                        <div class="p-3">
+                            <a href="{% url 'event_hub:event_display' event.slug %}"><h3 class="font-medium">{{event.title}}</h3></a>
+                            <p>{{event.city}}</p>
+                            <time class="" datetime="{{event.datetime|convert_utc_to_local:event.timezone}}">{{event.datetime|convert_utc_to_local:event.timezone}}</time>
+                            <p>({{event.timezone}})</p>
+                        </div>
+                    </div>        
+                {% endfor %}
+            </div>
+            <div class="pagination self-center">
+                <span>
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1">&laquo; first</a>
+                        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                    {% endif %}
+            
+                    <span class="current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+            
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>  
+        </div>
+    </section>
+{% endblock %}

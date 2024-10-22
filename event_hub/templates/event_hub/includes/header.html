@@ -1,0 +1,19 @@
+{% load static %}
+<header class="h-[4.5rem] px-6 bg-blue-100">
+    <nav class="h-full max-w-6xl mx-auto flex items-center justify-between">
+        <h1 class="text-3xl font-semibold mr-2"><a href="{% url 'event_hub:event_list' %}">Event<span class="text-blue-600">Hub</span></a></h1>
+        <div class="flex gap-3 items-center">
+            
+            <div class="w-12 h-12 rounded-full border-2 border-gray-300 flex-shrink-0">
+                <a href="{% url 'event_hub:user_display' request.user.username %}">
+                    <img src="{% if request.user.avatar %}{{request.user.avatar.url}}{% else %} {% static 'event_hub/img/defaultUser.jpg' %} {% endif %}"
+                        class="w-full h-full object-contain rounded-full" />
+                </a>
+            </div>
+            <form action="{% url 'event_hub:logout' %}" method="post">
+                {% csrf_token %}
+                <button class="py-2 px-6 rounded font-semibold border-gray-400 border ">Logout</button>
+            </form>
+        </div>
+    </nav>
+</header>

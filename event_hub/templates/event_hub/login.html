@@ -1,0 +1,37 @@
+{% extends 'event_hub/base.html' %}
+
+{% block content %}
+    <div class="min-h-screen flex items-center justify-center "> 
+        <div class="shadow-md rounded-md w-full max-w-md p-6 ">
+            <h1 class="text-center text-4xl font-semibold mb-6">Event<span class="text-blue-600">Hub</span></h1>
+            <form class="flex flex-col gap-3" method="post" action="{% url 'event_hub:login' %}">
+                {% csrf_token %}
+                <div class="flex flex-col gap-2">
+                    <label for="email">Email:</label>
+
+                    <input type="email" name="username" id="email" maxlength="254" required=""
+                        class="border-2 p-2 rounded">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="id_password">Password:</label>
+                    <input type="password" name="password" autocomplete="current-password" required="" id="id_password"
+                        class="border-2 p-2 rounded">
+                </div>
+                {% if form.errors %}
+                    <p class="text-red-500">Wrong credentials!! Please try again.</p>
+                {% endif %}
+                <button type="submit" class="py-2 px-6 mt-3 rounded self-center font-semibold bg-blue-600  text-white">Login</button>
+                <p class="self-center">Don't have an account? <a href="{% url 'event_hub:signup' %}" class="text-blue-600 font-medium">Sign Up</a></p>
+            </form>
+        </div>
+        {% if messages %}
+        <div id="id_messages" style="display: none;">
+            {% for message in messages %}
+                <div class="message" data-level="{{ message.level }}" data-tags="{{ message.tags }}">
+                    {{ message|escapejs }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

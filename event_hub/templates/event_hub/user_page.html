@@ -1,0 +1,44 @@
+{% extends 'event_hub/base.html' %}
+{% load static %}
+{% load event_hub_extras %}
+
+{% block content %}
+    {% include 'event_hub/includes/header.html' %}
+    <section class="px-6 py-8 text-gray-800">
+        <div class="flex flex-col w-full gap-3">
+            <div class="flex gap-6 max-w-md w-full self-center">
+                <div class="w-32 h-32 rounded-full mb-3 border-2 flex-shrink-0 mt-1">
+                    <img src="{% if myuser.avatar %}{{myuser.avatar.url}}{% else %} {% static 'event_hub/img/defaultUser.jpg' %} {% endif %}"
+                        class="w-full h-full object-cover rounded-full" />
+                </div>
+                <div>
+                    <h2 class="text-2xl font-medium mb-0.5">{{myuser.name}}</h2>
+                    <p class="mb-2 text-gray-600">@{{myuser.username}}</p>
+                    <p>{{myuser.bio}}</p>
+                    {% if request.user == myuser %}
+                        <a href="{% url 'event_hub:user_update' %}" class="inline-block px-2 py-1 border-2 mt-2 mr-2 rounded-sm">Edit Profile</a>
+                        <a href="{% url 'event_hub:event_create' %}" class="inline-block px-2 py-1 rounded-sm bg-green-400">New Event</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="w-full max-w-5xl mx-auto  mt-6">
+                <h2 class="mb-6 text-2xl font-medium text-gray-500">Events Organized :</h2>
+                <div class="grid grid-cols-3 gap-y-5">
+                    {% for event in event_list %}
+                        <div class="max-w-80 w-full rounded shadow-md">
+                            <div class="w-full h-52 rounded-t">
+                                <img src="{{event.cover_image.url}}" class="rounded-t object-cover w-full h-full bg-slate-200">
+                            </div>
+                            <div class="p-3">
+                                <a href="{% url 'event_hub:event_display' event.slug %}"><h3 class="font-medium">{{event.title}}</h3></a>
+                                <p>{{event.city}}</p>
+                                <time class="" datetime="{{event.datetime|convert_utc_to_local:event.timezone}}">{{event.datetime|convert_utc_to_local:event.timezone}}</time>
+                                <p>({{event.timezone}})</p>
+                            </div>
+                        </div>        
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

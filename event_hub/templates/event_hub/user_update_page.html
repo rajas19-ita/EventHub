@@ -1,0 +1,77 @@
+{% extends 'event_hub/base.html' %}
+{% load static %}
+
+{% block content %}
+    {% include 'event_hub/includes/header.html' %}
+    <section class="px-6 py-8 flex justify-center">
+        <form class="flex flex-col" action="{% url 'event_hub:user_update' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="w-36 h-36 rounded-full mb-3 border-2 self-center relative">
+                <img id="avatar_img" src="{% if myuser.avatar %}{{myuser.avatar.url}}{% else %} {% static 'event_hub/img/defaultUser.jpg' %} {% endif %}"
+                    class="w-full h-full object-cover rounded-full" />
+                <label for="id_avatar" class="absolute top-0 right-0 px-2 py-1 rounded-md border-green-600 border-2 cursor-pointer">
+                    <i class="fa-solid fa-pen-to-square text-green-600"></i>
+                </label>
+                <input type="file" name="avatar" accept="image/*" id="id_avatar" class="hidden">
+            </div>
+            <table style="border-spacing: 10px 10px; border-collapse: unset;">
+                <tr style="vertical-align: top;">
+                    <th class="text-left">
+                        <label for="id_username" >Username:</label>
+                    </th>
+                    <td>
+                        <div class="flex flex-col items-start flex-column gap-1">
+                            <input type="text" name="username" value="{{user.username}}" maxlength="150" required="" id="id_username"
+                            class="border-2 p-2 rounded">
+                            {% for error in form.username.errors %}
+                                <p class="text-red-500">{{error}}</p>
+                            {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+                <tr style="vertical-align: top;">
+                    <th class="text-left">
+                        <label for="id_name" >Name:</label>
+                    </th>
+                    <td>
+                        <div class="flex flex-col items-start flex-column gap-1">
+                            <input type="text" name="name" value="{{user.name}}" maxlength="150" required="" id="id_name"
+                            class="border-2 p-2 rounded">
+                            {% for error in form.name.errors %}
+                                <p class="text-red-500">{{error}}</p>
+                            {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+                <tr style="vertical-align: top;">
+                    <th class="text-left">
+                        <label for="id_bio">Bio:</label>
+                    </th>
+                    <td>
+                        <div class="flex flex-col items-start flex-column gap-1">
+                            <textarea name="bio" cols="40" rows="10" maxlength="300" id="id_bio" class="border-2 p-2 rounded">{{user.bio}}</textarea>
+                            {% for error in form.bio.errors %}
+                                <p class="text-red-500">{{error}}</p>
+                            {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <button type="submit" class="bg-green-600 text-white py-2 px-6 rounded self-center font-semibold">Update</button>
+        </form>
+    </section>
+    <script>
+        const avatar = document.getElementById('avatar_img')
+        const avatarInput = document.getElementById('id_avatar')
+
+        avatarInput.addEventListener('change',(e)=>{
+            const selectedFile =  avatarInput.files[0]
+            const reader = new FileReader()
+
+            reader.onload = function(e){
+                avatar.setAttribute('src',e.target.result)
+            }
+            reader.readAsDataURL(selectedFile)
+        })
+    </script>
+{% endblock %}
